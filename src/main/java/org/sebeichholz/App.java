@@ -1,7 +1,9 @@
 package org.sebeichholz;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -16,6 +18,9 @@ import twitter4j.UploadedMedia;
 
 public final class App {
 
+	//private static final String GERMAN_FLAG = "\uE50E";
+	private static final String RED_HEART = "\u2764"; //"\uE022";
+	
     public static void main(String[] args) throws TwitterException {
     	
     	
@@ -27,22 +32,17 @@ public final class App {
     			
     			Collection<File> jpgFiles = FileUtils.listFiles(new File(args[0]), new String[]{"jpg"}, true);
     			
-    			//jpgFiles = jpgFiles.stream().filter(f -> f.getName().contains("14")).collect(Collectors.toList());
+    			String filter = null;
+    			//filter = "Import";
     			
-//    			File dir = new File(args[0]);
-//    			File[] jpgFiles = dir.listFiles(new FilenameFilter() {
-//					@Override
-//					public boolean accept(File dir, String name) {
-//						return name.endsWith("jpg")
-//								//&& name.contains("letzte")
-//								;
-//					}
-//				});
-    			//String filename = jpgFiles[new Random().nextInt(jpgFiles.length)].getAbsolutePath();
-
+    			final String filter2 = filter;
+    			
+    			if (filter2!=null) {
+    				jpgFiles = jpgFiles.stream().filter(f -> f.getName().contains(filter2)).collect(Collectors.toList());
+    			}
+    					
+    			
     			String filename = random(jpgFiles).getAbsolutePath();
-    			
-    			//System.out.println(filename);
     			
     			if (args.length==2 && "doit".equals(args[1])) {
     				postTweet(filename, true);
@@ -67,15 +67,54 @@ public final class App {
 
 	private static void postTweet(String filenameWithAbsolutePath, boolean doIt) throws TwitterException {
 		
+        Twitter twitter = new TwitterFactory().getInstance();
+
 		System.out.println("Verzeichnis = " + filenameWithAbsolutePath);
 		
-		//String GERMAN_FLAG = "\uE50E";
-		String RED_HEART = "\u2764"; //"\uE022";
+		List<String> filenamesToUse = new ArrayList<String>();
+
 		
-        Twitter twitter = new TwitterFactory().getInstance();
-	    File imagefile = new File(filenameWithAbsolutePath);
+		if (filenameWithAbsolutePath.endsWith("__1.jpg") 
+			|| filenameWithAbsolutePath.endsWith("__2.jpg")
+			|| filenameWithAbsolutePath.endsWith("__3.jpg")
+			|| filenameWithAbsolutePath.endsWith("__4.jpg")
+		) {
+			
+			String filenameWithoutNumber = filenameWithAbsolutePath.substring(0, filenameWithAbsolutePath.length()-4);
+			System.out.println(filenameWithoutNumber);
+			
+			String filenameWithAbsolutePathWithoutNumber = filenameWithAbsolutePath
+    			.replace("__1.jpg", "")
+    			.replace("__2.jpg", "")
+    			.replace("__3.jpg", "")
+    			.replace("__4.jpg", "");
+    		
+			for (int i=1; i<=4; i++) {
+				String a = filenameWithAbsolutePathWithoutNumber + "__" + i + ".jpg";
+				if (new File(a).exists()) {
+					filenamesToUse.add(new File(a).getAbsolutePath());
+				}
+			}
+			
+		} 
+		
+		else {
+			filenamesToUse.add(filenameWithAbsolutePath);
+		}
+		
+		
+		
+		
+		
+	    String basename = FilenameUtils.getBaseName(filenamesToUse.get(0)
+	    		.replace("__1.jpg", ".jpg")
+	    		.replace("__2.jpg", ".jpg")
+	    		.replace("__3.jpg", ".jpg")
+	    		.replace("__4.jpg", ".jpg")
+	    		);
 	    
-	    String basename = FilenameUtils.getBaseName(filenameWithAbsolutePath);
+	    
+	    basename = basename.replace("_", " ");
 	    
 	    String regex = "(?<prefix>.*)(?<jahr>[0-9][0-9][0-9][0-9])-(?<monat>[0-9][0-9])(?<postfix>.*)";
 	    if (basename.matches(regex)) {
@@ -88,15 +127,30 @@ public final class App {
 	    	//System.out.println(basename.replaceAll(regex, monat + "/" + jahr));
 	    	basename = prefix + basename.replaceAll(regex, monat + "/" + jahr + postfix);
 	    }
-	    
+	    	    
 	    
 	    String tweetText = basename + " " + RED_HEART ;
-    	System.out.println("tweetText = " + tweetText);
 
-	    if (doIt) {
-		    long[] mediaIds = new long[1];
-		    UploadedMedia media = twitter.uploadMedia(imagefile);
-		    mediaIds[0] = media.getMediaId();
+//	    if (doIt) {
+	    	
+		    long[] mediaIds = new long[filenamesToUse.size()];
+		    
+		    for (int filenummer = 0; filenummer < filenamesToUse.size(); filenummer++) {
+		    	File imagefile = new File(filenamesToUse.get(filenummer));
+		    	if (doIt) {
+		    		System.out.println("Lade Datei hoch: " + FilenameUtils.getBaseName(imagefile.getAbsolutePath()));
+		    		UploadedMedia media = twitter.uploadMedia(imagefile);
+		    		mediaIds[filenummer] = media.getMediaId();
+		    	} else {
+		    		System.out.println("SIMULIERE Lade Datei hoch: "
+		    				+ imagefile.getAbsolutePath()
+		    				//+ FilenameUtils.getBaseName(imagefile.getAbsolutePath())
+		    				);
+		    	}
+		    }
+		    
+	    	System.out.println("tweetText = " + tweetText);
+		    
 		    
 			StatusUpdate statusUpdate = new StatusUpdate(tweetText
 			//+ "\n\nKultpower.de" 
@@ -105,13 +159,18 @@ public final class App {
 		    
 		    statusUpdate.setMediaIds(mediaIds);
 		    
-			Status status = twitter.updateStatus(statusUpdate);
-			System.out.println("Tweet wurde gepostet:  [" + status.getText() + "].");		
-	    }
-	    
-	    else {
-	    	System.out.println("SimulationModus - kein Tweet gepostet");
-	    }
+		    if (doIt) {
+				Status status = twitter.updateStatus(statusUpdate);
+				System.out.println("Tweet wurde gepostet:  [" + status.getText() + "].");
+		    }
+		    else {
+		    	System.out.println("SimulationModus - kein Tweet gepostet");
+		    }
+		    
+//	    }
+//	    else {
+//	    	System.out.println("SimulationModus - kein Tweet gepostet");
+//	    }
 
 	
 		
