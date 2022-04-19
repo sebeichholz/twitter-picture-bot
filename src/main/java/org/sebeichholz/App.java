@@ -32,14 +32,30 @@ public final class App {
     			
     			Collection<File> jpgFiles = FileUtils.listFiles(new File(args[0]), new String[]{"jpg"}, true);
     			
-    			String filter = null;
-    			//filter = "Import";
+    			Collection<File> removeList = new ArrayList<File>();
     			
-    			final String filter2 = filter;
-    			
-    			if (filter2!=null) {
-    				jpgFiles = jpgFiles.stream().filter(f -> f.getName().contains(filter2)).collect(Collectors.toList());
+    			for (File f: jpgFiles) {
+    				if (f.getAbsolutePath().endsWith("__2.jpg")
+    						|| f.getAbsolutePath().endsWith("__3.jpg")
+    						|| f.getAbsolutePath().endsWith("__4.jpg")
+    						) {
+    					removeList.add(f);
+    				}
     			}
+    			
+    			if (!removeList.isEmpty()) {
+    				//System.out.println("Anzahl Dateien bisher: " + jpgFiles.size());
+    				jpgFiles.removeAll(removeList);
+    				//System.out.println("Anzahl Dateien jetzt: " + jpgFiles.size());
+    			}
+    			
+//    			String filter = null;
+//    			//filter = "Import";
+//    			
+//    			final String filter2 = filter;
+//    			if (filter2!=null) {
+//    				jpgFiles = jpgFiles.stream().filter(f -> f.getName().contains(filter2)).collect(Collectors.toList());
+//    			}
     					
     			
     			String filename = random(jpgFiles).getAbsolutePath();
@@ -69,7 +85,7 @@ public final class App {
 		
         Twitter twitter = new TwitterFactory().getInstance();
 
-		System.out.println("Verzeichnis = " + filenameWithAbsolutePath);
+		System.out.println("filename = " + filenameWithAbsolutePath);
 		
 		List<String> filenamesToUse = new ArrayList<String>();
 
