@@ -1,6 +1,7 @@
 package org.sebeichholz;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -44,23 +45,60 @@ public final class App {
     			}
     			
     			if (!removeList.isEmpty()) {
-    				//System.out.println("Anzahl Dateien bisher: " + jpgFiles.size());
     				jpgFiles.removeAll(removeList);
-    				//System.out.println("Anzahl Dateien jetzt: " + jpgFiles.size());
     			}
     			
-//    			String filter = null;
-//    			//filter = "Import";
-//    			
-//    			final String filter2 = filter;
-//    			if (filter2!=null) {
-//    				jpgFiles = jpgFiles.stream().filter(f -> f.getName().contains(filter2)).collect(Collectors.toList());
-//    			}
+/*
+    			String filter = null;
+    			filter = "Chart";
+    			
+    			final String filter2 = filter;
+    			if (filter2!=null) {
+    				jpgFiles = jpgFiles.stream().filter(f -> f.getName().contains(filter2)).collect(Collectors.toList());
+    			}
+*/
+    			
+	        	System.out.println("Files for selection: " + jpgFiles.size());    			
     					
     			
-    			String filename = random(jpgFiles).getAbsolutePath();
+    			boolean doIt = args.length==2 && "doit".equals(args[1]);
     			
-    			if (args.length==2 && "doit".equals(args[1])) {
+    			String filename = null;
+    			boolean fileFound = false;
+    			
+    			while (!fileFound) {
+    				
+    				if (jpgFiles.isEmpty()) {
+    					System.out.println("No more files available! Program will quit.");
+    					System.exit(0);
+    				}
+    				File f = random(jpgFiles);
+    				filename = f.getAbsolutePath();
+    				
+        			System.out.println("filename1 = " + filename);
+        			String filenameUsed = filename + ".used" + (doIt ? ".real" : ".sim");
+        			System.out.println("filenameUsed = " + filenameUsed);
+        	        File fileUsed = new File(filenameUsed);
+        	        if (fileUsed.exists()) {
+        	        	System.out.println("file was already used!");
+        	        	jpgFiles.remove(f);
+        	        	System.out.println("Files for selection: " + jpgFiles.size());
+        	        	continue;
+        	        }
+        	        try {
+        	        	fileUsed.createNewFile();
+            			System.out.println("created: " + filenameUsed);
+        				fileFound=true;
+    				} catch (IOException e) {
+    					System.out.println("Error creating used file!");
+    				}
+        	        
+    			}
+    			
+
+    			
+    			
+				if (doIt) {
     				postTweet(filename, true);
     			} else {
         			postTweet(filename, false);
@@ -147,79 +185,44 @@ public final class App {
 	    
 	    String tweetText = basename + " " + RED_HEART ;
 
-//	    if (doIt) {
 	    	
-		    long[] mediaIds = new long[filenamesToUse.size()];
+	    long[] mediaIds = new long[filenamesToUse.size()];
+	    
+	    for (int filenummer = 0; filenummer < filenamesToUse.size(); filenummer++) {
+	    	File imagefile = new File(filenamesToUse.get(filenummer));
+	    	if (doIt) {
+	    		System.out.println("Uploading file: " + FilenameUtils.getBaseName(imagefile.getAbsolutePath()));
+	    		UploadedMedia media = twitter.uploadMedia(imagefile);
+	    		mediaIds[filenummer] = media.getMediaId();
+	    	} else {
+	    		System.out.println("SIMULATION Uploading file: "
+	    				+ imagefile.getAbsolutePath()
+	    				//+ FilenameUtils.getBaseName(imagefile.getAbsolutePath())
+	    				);
+	    	}
+	    }
+	    
+    	System.out.println("tweetText = " + tweetText);
+	    
+	    
+		StatusUpdate statusUpdate = new StatusUpdate(tweetText
+		//+ "\n\nKultpower.de" 
+		//+ RED_HEART +"4" + GERMAN_FLAG + " mags"
+		);
+	    
+	    statusUpdate.setMediaIds(mediaIds);
+	    
+	    if (doIt) {
+			Status status = twitter.updateStatus(statusUpdate);
+			System.out.println("Tweet was posted:  [" + status.getText() + "].");
+	    }
+	    else {
+	    	System.out.println("SIMULATION MODE - no Tweet posted");
+	    }
 		    
-		    for (int filenummer = 0; filenummer < filenamesToUse.size(); filenummer++) {
-		    	File imagefile = new File(filenamesToUse.get(filenummer));
-		    	if (doIt) {
-		    		System.out.println("Lade Datei hoch: " + FilenameUtils.getBaseName(imagefile.getAbsolutePath()));
-		    		UploadedMedia media = twitter.uploadMedia(imagefile);
-		    		mediaIds[filenummer] = media.getMediaId();
-		    	} else {
-		    		System.out.println("SIMULIERE Lade Datei hoch: "
-		    				+ imagefile.getAbsolutePath()
-		    				//+ FilenameUtils.getBaseName(imagefile.getAbsolutePath())
-		    				);
-		    	}
-		    }
-		    
-	    	System.out.println("tweetText = " + tweetText);
-		    
-		    
-			StatusUpdate statusUpdate = new StatusUpdate(tweetText
-			//+ "\n\nKultpower.de" 
-			//+ RED_HEART +"4" + GERMAN_FLAG + " mags"
-			);
-		    
-		    statusUpdate.setMediaIds(mediaIds);
-		    
-		    if (doIt) {
-				Status status = twitter.updateStatus(statusUpdate);
-				System.out.println("Tweet wurde gepostet:  [" + status.getText() + "].");
-		    }
-		    else {
-		    	System.out.println("SimulationModus - kein Tweet gepostet");
-		    }
-		    
-//	    }
-//	    else {
-//	    	System.out.println("SimulationModus - kein Tweet gepostet");
-//	    }
-
 	
 		
 	}
 
-//	private static void post1() throws TwitterException {
-//		
-//        //--------------------------------------------------
-//        // getTweets example
-//        //--------------------------------------------------
-//        Twitter twitter = new TwitterFactory().getInstance();
-//        final TweetsResponse tweets = GetTweetsKt.getTweets(twitter,
-//                new long[]{1494714840060993543L},
-//                null, null, null, null, null, "");
-//        System.out.println("tweets = " + tweets);
-//        
-//        for (Tweet t: tweets.getTweets()) {
-//        	System.out.println(t.getText());
-//        }
-//        
-//	    String text       = "Test post Tweet V2 at " + LocalDateTime.now() + " #TwitterAPI";
-//        Status updateStatus = twitter.updateStatus(text);
-//        System.out.println(updateStatus.getId());
-//
-//
-////        //--------------------------------------------------
-////        // getUsers example
-////        //--------------------------------------------------
-////        final long twitterDesignId = 87532773L;
-////        final UsersResponse users = GetUsersKt.getUsers(twitter, new long[]{twitterDesignId}, null, null, "");
-////        System.out.println("users = " + users);
-//        
-//	}
-	
 	
 }
