@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -21,6 +20,8 @@ public final class App {
 
 	//private static final String GERMAN_FLAG = "\uE50E";
 	private static final String RED_HEART = "\u2764"; //"\uE022";
+	
+	private static final int MAX_ERRORS = 10;
 	
     public static void main(String[] args) throws TwitterException {
     	
@@ -66,7 +67,14 @@ public final class App {
     			String filename = null;
     			boolean fileFound = false;
     			
+    			int errors = 0;
+    			
     			while (!fileFound) {
+    				
+    				if (errors > MAX_ERRORS) {
+    					System.out.println("Too many errors! Program will quit.");
+    					System.exit(0);	
+    				}
     				
     				if (jpgFiles.isEmpty()) {
     					System.out.println("No more files available! Program will quit.");
@@ -91,6 +99,8 @@ public final class App {
         				fileFound=true;
     				} catch (IOException e) {
     					System.out.println("Error creating used file!");
+    					e.printStackTrace();
+    					errors++;
     				}
         	        
     			}
