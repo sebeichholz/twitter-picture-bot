@@ -24,11 +24,13 @@ If you want to use more than one image in a tweet (e.g. if you have multiple fil
 3. myfile__3.jpg
 4. myfile__4.jpg
 
+# docker
 
 I use docker to run the application:
 
 `docker run -i --rm --name jdk17 -v /var/www/twitter-picture-bot:/twitter-picture-bot openjdk:17.0.2-oraclelinux8 java -jar /twitter-picture-bot/app.jar /twitter-picture-bot/images doit`
 
+# about
 This software was developed for usage at the [KultpowerBot](https://twitter.com/KultpowerBot "KultpowerBot")
   
   
