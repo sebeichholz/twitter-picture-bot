@@ -11,7 +11,7 @@ Small java app that publishes a randomly selected image to twitter
 
 # usage
 1. (clone repository)
-2. copy src/main/resources/twitter4j.properties.tpl to src/main/resources/twitter4j.properties and enter your twitter oauth things
+2. copy src/main/resources/twitter4j.properties.tpl to src/main/resources/twitter4j.properties and enter your twitter oauth things (get them here: https://developer.twitter.com/en/docs/authentication/oauth-1-0a/obtaining-user-access-tokens )
 3. run "mvn install"
 4. get the jar from the installation folder and copy it e.g. to app.jar
 6. for simulation mode run: `java -jar [image directory]`
