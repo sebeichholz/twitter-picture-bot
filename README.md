@@ -4,7 +4,7 @@ Small java app that publishes a randomly selected image to twitter
 # features
 1. scan a given directory (and recursive all subdirectories) for image files and select one random image
 2. post this image to twitter
-3. create empty marker file for used image (ends with ".used.real", so this image will not be used again until you delete this empty file
+3. create empty marker file for used image (ends with ".used.real"), so this image will not be used again until you delete this marker file
 4. optional: simulation mode to check what the app would do
 
 # usage
