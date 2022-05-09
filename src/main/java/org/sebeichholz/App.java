@@ -18,7 +18,6 @@ import twitter4j.UploadedMedia;
 
 public final class App {
 
-	//private static final String GERMAN_FLAG = "\uE50E";
 	private static final String RED_HEART = "\u2764"; //"\uE022";
 	
 	private static final int MAX_ERRORS = 10;
@@ -116,8 +115,12 @@ public final class App {
     			
     		}
     	} 
+    	
+    	
     	else {
-    		System.out.println();
+    		System.out.println("Wrong number of arguments!");
+    		System.out.println("usage for simulation: java .jar app.jar <image-directory> ");
+    		System.out.println("usage for real action: java .jar app.jar <image-directory> doit");
     	}
     	
 
