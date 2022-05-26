@@ -1,5 +1,5 @@
 # twitter-picture-bot
-Small java app that publishes a randomly selected image to twitter
+Small java app that publishes a randomly selected image to twitter<
 
 # features
 1. scan a given directory (and recursive all subdirectories) for image files and select one random image
@@ -14,8 +14,8 @@ Small java app that publishes a randomly selected image to twitter
 2. copy src/main/resources/twitter4j.properties.tpl to src/main/resources/twitter4j.properties and enter your twitter oauth things (get them here: https://developer.twitter.com/en/docs/authentication/oauth-1-0a/obtaining-user-access-tokens )
 3. run "mvn install"
 4. get the jar from the installation folder and copy it e.g. to app.jar
-6. for simulation mode run: `java -jar [image directory]`
-7. for real mode run: `java -jar [image directory] doit`
+6. for simulation mode run: `java -jar app.jar [image directory]`
+7. for real mode run: `java -jar app.jar [image directory] doit`
 
 # use multiple image for one tweet
 If you want to use more than one image in a tweet (e.g. if you have multiple files/pages for one thing) name them (up to four) like this:
