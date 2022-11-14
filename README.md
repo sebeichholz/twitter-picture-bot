@@ -1,5 +1,5 @@
 # mastodon-picture-bot
-Small java app that publishes a randomly selected image to twitter<
+Small java app that publishes a randomly selected image to mastodon
 
 # features
 1. scan a given directory (and recursive all subdirectories) for image files and select one random image
